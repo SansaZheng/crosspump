@@ -1,0 +1,5 @@
+Date,Channel,Currency,Exchange,success,pump_date
+2021-03-03T12:01:00Z,Synthetic Chan A,AAA,Binance,1,2021-03-03T12:07:00Z
+2021-03-03T12:03:00Z,Synthetic Chan B,AAA,Binance,1,2021-03-03T12:07:00Z
+2021-03-04T15:02:13Z,Synthetic Chan A,BBB,Binance,1,2021-03-04T14:58:00Z
+2021-03-05T09:00:00Z,Synthetic Chan C,CCC,Binance,0,

@@ -1,0 +1,18 @@
+# B9 Moura, Paoletti, Ferreira, Almeida, ICWSM 2027 (accepted), arXiv:2609.01176 - crosspump/baselines/b9_moura26.py, registered as xp_moura26.
+# CA-CFAR parameters copied from 02_anomaly_detection.ipynb cell 5; sheet: crosspump/baselines/sheets/moura26.md
+baseline: xp_moura26
+alpha: 0.01                          # per-bar false-alarm budget on normal rows
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+n_exec: 4
+w_max: 1.0
+model:
+  cell_bars: 3                       # one CFAR cell = 3 bars (paper: one day of mentions) - adaptation, see sheet
+  n_train_cells: 5                   # NUM_TRAINING_CELLS_PER_SIDE = 5 (past side only here)
+  n_guard_cells: 1                   # NUM_GUARD_CELLS_PER_SIDE = 1
+  p_fa: 0.05                         # P_FA = 0.05 -> alpha = N * (Pfa ** (-1 / N) - 1) = 4.1028
+  eps: 1.0                           # additive smoothing inside the log ratio (keeps the detection boundary)
+smoke:
+  model: {}

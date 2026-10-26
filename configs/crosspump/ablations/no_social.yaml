@@ -1,0 +1,4 @@
+# Ablation no_social of CrossPump (applied as baseline.platforms override by scripts/xp_run_all.sh --ablations)
+_base_: crosspump
+ablation: no_social
+platforms: [wallet, orderflow]

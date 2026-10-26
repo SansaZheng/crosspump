@@ -1,0 +1,21 @@
+# B6 Bolz et al., arXiv:2412.18848 (2024) / ACM 2025 doi:10.1145/3733815.3764042 - crosspump/baselines/b6_bolz24.py, registered as xp_bolz24.
+# Sheet: crosspump/baselines/sheets/bolz24.md
+baseline: xp_bolz24
+alpha: 0.01                          # per-bar false-alarm budget on normal rows
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+n_exec: 4
+w_max: 1.0
+model:
+  features: [taker_imb, log_volume, log_trades]   # raw order-flow proxies z-scored causally (paper: buy volume / trades / book imbalance)
+  warmup: 30                         # bars before the EWMA z-score is trusted (abstain before)
+  halflife: 60.0                     # EWMA half-life in bars of the rolling baseline
+  back: 3                            # z_peak = max over the last `back` bars (and over the features)
+  social_back: 6                     # bars over which text_score / message counts are accumulated
+  combine: logistic                  # logistic (fitted on train episodes) | additive (z_peak + beta * text_sum, no training)
+  beta: 1.0
+  C: 1.0
+smoke:
+  model: {warmup: 20, halflife: 30.0}

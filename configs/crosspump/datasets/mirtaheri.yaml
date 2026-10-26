@@ -1,0 +1,56 @@
+# D7 Mirtaheri et al., IEEE TCSS 8(3) 2021 (doi:10.1109/TCSS.2021.3059286, arXiv:1902.03110) -- crosspump/data/loaders/d7_mirtaheri.py
+# Raw: <root>/crosspump/mirtaheri/Telegram/classified/coin-pump.csv (,Channel ID,Message ID,Date,Time,Coin), Telegram/channels/<id>.jl,
+#      Twitter/{tweets-ts,users-ts}/$COIN.json + Twitter/sentiment-ts/COIN.json ({"data": [[{"$date": ms}, value], ...]}, 1-minute cadence)
+#      + Binance 1m klines <root>/crosspump/binance_klines/<SYMBOL>BTC-1m-YYYY-MM.csv (2017-2018)
+name: xp_mirtaheri
+root: data_raw
+subdir: mirtaheri
+exchange: any                    # the table has NO exchange column: any = keep every attempt whose coin has Binance klines; Binance = also require the word in the message
+quote: BTC
+exclude_coins: [BTC, ETH, USDT, BNB, HOLD]   # quote currencies / English words matched as tickers by the source classifier
+require_ticker_in_text: true     # keep a row only if the coin appears in the message as an UPPERCASE token or cashtag
+announcement_score: label        # text_score 1.0 on the classified pump message of the episode's coin | keyword
+merge_hours: 6.0                 # classified messages of the same coin within this span = one pump attempt
+twitter: true
+telegram: true
+twitter_agg_minutes: 5           # tweet-count bucket (1 = native 1-minute cadence); events are stamped at the bucket END
+bar_minutes: 5
+pre_bars: 864
+post_bars: 96
+lead: 2
+peak_window_bars: 12
+end_bars_after_peak: 24
+n_controls_per_pump: 2
+gap_hours: 24
+control_span_days: 30
+control_exclude_window: true
+max_pumps: 2000                  # evenly spaced cap: the table holds tens of thousands of classified messages (null = all)
+social_lag_bars: 0.0
+wallet_lag_bars: 1.0
+text_slots: 4
+text_dim: 32
+text_max_mb: 2048
+lookback: 48
+horizons: [1, 2, 3, 6, 12, 24]
+latency: 1
+bars_per_year: 105120
+seed: 0
+split: {train_frac: 0.6, val_frac: 0.15, purge_hours: 96}
+split_axis: assets
+pit:
+  fields: [avail_feat, avail_label, universe, avail_text]
+  rule: "an event / document is usable at decision row t iff avail <= t; streams are rasterised at row ceil(avail)"
+  avail_feat: "t (bar close)"
+  avail_label: "episode end row = peak + end_bars_after_peak on event rows, else t + max(horizons)"
+  avail_text: "first row at which the Telegram message is usable = ceil(message time + social_lag_bars)"
+  universe: "a kline exists at that bar"
+  tradable: "kline exists and volume > 0"
+  streams: "Twitter bucket: time = avail = bucket end; Telegram = message time + social_lag_bars; wallet = block time + wallet_lag_bars; orderflow = bar close"
+  wallet: "OPTIONAL <root>/crosspump/onchain/mirtaheri_transfers.csv; absent = missing modality (never zeros)"
+assumptions:
+  - "coin-pump.csv is a classifier + ticker-matching output: BTC/ETH/USDT/BNB/HOLD rows dropped; the ticker must appear in the message in upper case"
+  - "no exchange column: an attempt is kept when Binance klines exist for the coin (most 2017-18 attempts ran on YoBit/Cryptopia/Bittrex and are dropped)"
+  - "Telegram views are crawl-time totals (not PIT): reach is NaN; Twitter reach = sum of per-minute unique users"
+  - "Twitter and Telegram both map to platform 0; source id 1 = Twitter"
+  - "episodes are classifier-detected pump attempts / signals, not verified pump-and-dump events; peak = argmax bar high within peak_window_bars"
+  - "coin-pump.csv Date/Time are UTC (equal to the .jl $date)"

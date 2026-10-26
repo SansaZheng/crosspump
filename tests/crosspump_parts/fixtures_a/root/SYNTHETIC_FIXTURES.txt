@@ -1,0 +1,1 @@
+SYNTHETIC FIXTURES written by tests/crosspump_parts/fixtures_a/make_fixtures.py (seed 7). Not real data.

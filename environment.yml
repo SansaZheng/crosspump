@@ -1,0 +1,17 @@
+name: crosspump
+channels: [conda-forge]
+dependencies:
+  - python=3.10
+  - pip
+  - numpy<2.3
+  - pandas>=2.0
+  - scipy
+  - scikit-learn
+  - pyyaml
+  - tabulate
+  - lightgbm
+  - xgboost
+  - pyarrow
+  - requests
+  - pip:
+      - torch==2.8.0

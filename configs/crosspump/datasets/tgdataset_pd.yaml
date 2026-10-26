@@ -1,0 +1,56 @@
+# D5 Moura, Paoletti, Ferreira, Almeida, ICWSM 2027 (arXiv:2609.01176) bursts over the TGDataset (La Morgia et al., KDD 2025; Zenodo 7640712)
+# -- crosspump/data/loaders/d5_tgdataset_pd.py
+# Raw: <root>/crosspump/moura/reference_data/{anomaly_time_intervals.json, coins_exchanges_and_trades_normalized.json}
+#      + Binance 1m klines <root>/crosspump/binance_klines/<SYMBOL>{BTC|USDT}-1m-YYYY-MM.csv
+#      OPTIONAL <root>/crosspump/tgdataset_pd/burst_messages.csv (coin,time_ns,channel_id,text) extracted from the TGDataset by xp_prepare_data.py --tgdataset
+name: xp_tgdataset_pd
+root: data_raw
+subdir: moura
+exchange: Binance                # only bursts whose coin has Binance klines (61 of 681 burst coins are listed on Binance in the coin map)
+quote: BTC                       # default quote; per-coin quote = first of `quotes` with kline files (meta['quote_of'])
+quotes: [BTC, USDT]
+require_listed: true             # the pair must also be listed for Binance in coins_exchanges_and_trades_normalized.json
+min_rise: 0.10                   # PROXY label: max close within peak_window_bars >= (1 + min_rise) x pre-burst 1-hour mean close ...
+revert_frac: 0.5                 # ... AND the close reverts by >= this fraction of the rise within post_bars
+burst_avail: cfar                # cfar: burst knowable at day end + cfar_future_days (PIT; drops same-window bursts) | day_end | first_message (ORACLE, diagnostics only)
+cfar_future_days: 6              # 5 training + 1 guard cells per side of the paper's daily CA-CFAR
+bar_minutes: 5
+pre_bars: 864
+post_bars: 96
+lead: 2
+peak_window_bars: 12
+end_bars_after_peak: 24
+n_controls_per_pump: 2           # sampled controls on top of the source controls (bursts without a market reaction)
+gap_hours: 24
+control_span_days: 30
+control_exclude_window: true
+max_pumps: null                  # cap on the number of bursts evaluated
+social_lag_bars: 0.0
+wallet_lag_bars: 1.0
+text_slots: 4
+text_dim: 32
+text_max_mb: 2048
+lookback: 48
+horizons: [1, 2, 3, 6, 12, 24]
+latency: 1
+bars_per_year: 105120
+seed: 0
+split: {train_frac: 0.6, val_frac: 0.15, purge_hours: 96}
+split_axis: assets
+pit:
+  fields: [avail_feat, avail_label, universe, avail_text]
+  rule: "an event / document is usable at decision row t iff avail <= t; streams are rasterised at row ceil(avail)"
+  avail_feat: "t (bar close)"
+  avail_label: "episode end row = peak + end_bars_after_peak on event rows, else t + max(horizons)"
+  avail_text: "only with extracted TGDataset messages: ceil(message time + social_lag_bars)"
+  universe: "a kline exists at that bar"
+  tradable: "kline exists and volume > 0"
+  streams: "burst-level social event: time = first_message_unix, avail per burst_avail (cfar = day end + 6 days -> not available inside the window -> dropped); orderflow = bar close"
+  wallet: "OPTIONAL <root>/crosspump/onchain/tgdataset_pd_transfers.csv; absent = missing modality (never zeros)"
+assumptions:
+  - "PROXY label (Moura et al. event list not released): rise >= min_rise within peak_window_bars after the burst start and >= revert_frac reverted within post_bars"
+  - "episodes are (coin, bursty day) pairs with Binance klines; bursts without a reaction are controls (burst_no_reaction)"
+  - "burst-level social stream is knowable only after the two-sided CA-CFAR look-ahead: with burst_avail=cfar the social modality is missing unless TGDataset messages are extracted"
+  - "burst event magnitude = log1p(duration in hours); text_score NaN; source 0"
+  - "TGDataset extraction (prepare --tgdataset) follows the published layout and is unverified; the paper's RoBERTa classifier is optional and never run"
+  - "mixed quotes (BTC preferred, USDT otherwise): prices are comparable only as returns"

@@ -1,0 +1,49 @@
+# D10 MemeChain (Mongardini & Mei, arXiv:2601.22185, 2026; Zenodo 18246856, CC-BY-4.0)
+# crosspump/data/loaders/d10_memechain.py. Raw: <root>/crosspump/memechain/data.zip (csv tables read in place)
+# The release has NO trade table: default mode = tabular (DEGENERATE panel, excluded from lead-time metrics, label = ChainPatrol BLOCKED, 9 tokens).
+# Time-series mode needs a USER-SUPPLIED <subdir>/trades.csv (address, platform, timestamp, price, amount, side, buyer/seller or taker/maker).
+name: xp_memechain
+root: data_raw
+subdir: crosspump/memechain
+mode: auto                       # auto = trades when a trade file exists, else tabular | tabular | trades
+quote: USD
+exchange: on-chain
+bar_minutes: 15
+pre_bars: 4
+post_bars: 96                    # 24 h after launch
+lead: 2
+peak_window_bars: 96
+end_bars_after_peak: 24
+n_controls_per_pump: null        # controls = the other registry tokens (no time-shifted sampling possible for launches)
+max_controls: 3000               # tabular mode: seeded subsample of the ~31.8k non-flagged tokens (null = all)
+gap_hours: null
+label_rule: cease_or_blocked     # trades mode: cease_24h | cease_or_blocked ; tabular mode always uses ChainPatrol BLOCKED
+cease_hours: 24
+quiet_hours: 168                 # the trade file must extend this long past the last trade to call it a cessation
+wallet_side: taker
+wallet_lag_minutes: 1
+burst_z: 2.5
+burst_warmup: 8
+burst_halflife: 24
+max_wallet_events_per_episode: 5000
+min_bars_frac: 0.0
+max_pumps: null
+text_slots: 0
+lookback: 4
+horizons: [1, 2, 3, 6, 12, 24]
+latency: 1
+bars_per_year: 35040
+seed: 0
+split: {train_frac: 0.6, val_frac: 0.15, purge_hours: 96}
+split_axis: assets
+pit:
+  fields: [avail_feat, avail_label, universe]
+  social: "ONE static event at launch, reach = number of linked accounts; links were collected at crawl time (static evidence only, not point-in-time)"
+  wallet: "trades mode: trade time + wallet_lag_minutes; tabular mode: missing"
+  orderflow: "trades mode: bar close; tabular mode: missing"
+  lead_time: "relative to the collapse (peak / last trade), not to the launch anchor"
+assumptions:
+  - "the public release has no transaction table; the paper's 24-hour-cessation statistic is not reproducible from it"
+  - "tabular mode: anchor = creation_date (deployment); is_pump = chain_patrol_status == BLOCKED"
+  - "trades mode: anchor = first trade; is_pump = last trade < first + cease_hours with quiet_hours of observed silence (or BLOCKED)"
+  - "economic_info_data / web_page_analysis are crawl-time snapshots and never features"

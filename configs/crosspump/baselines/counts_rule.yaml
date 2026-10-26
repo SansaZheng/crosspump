@@ -1,0 +1,8 @@
+# Reference row: z-scored total event count over the last `back` bars (crosspump/baselines/common.py CountsRule).
+baseline: xp_counts_rule
+alpha: 0.01
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+back: 12

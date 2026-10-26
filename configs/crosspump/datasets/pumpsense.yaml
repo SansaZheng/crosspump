@@ -1,0 +1,55 @@
+# D4 PumpSense -- Mahrous & Di Pietro, IEEE ICBC 2026 (arXiv:2605.09431; Zenodo 10.5281/zenodo.19616802, MIT) -- crosspump/data/loaders/d4_pumpsense.py
+# Raw: <root>/crosspump/pumpsense/icbc_2026_reproducibility-v1.1.zip (read in place: chat_data/<group>/result11.csv, columns date,text,Pump,Exchange,Coin,Notes[,photo])
+#      + Binance 1m klines <root>/crosspump/binance_klines/<SYMBOL>BTC-1m-YYYY-MM.csv
+name: xp_pumpsense
+root: data_raw
+subdir: pumpsense
+exchange: Binance                # venue filter on the labelled announcements; "all" keeps every venue whose coin has Binance klines (venue_mismatch flagged)
+quote: BTC                       # only 'sym/btc' labels (1,009 of the 1,036 Binance rows); usdt rows are mostly futures
+export_utc_offset_hours: 2.0     # `date` is local export time: UTC = date - offset (calibrated on announced GMT times + Binance volume bursts)
+group_utc_offset_hours: {"Alt the Way": 3.0, "Bitcoin Pump Group": 3.0, "Cryptic Trading": 3.0, "Crypto Coin Pump Signals": 3.0, "Big Pump Signal": 3.0}
+drop_notes: "cancel|postpon"     # labelled rows whose Notes match are not pump episodes
+drop_futures: true               # Notes 'futures' rows (USDT-margined futures, not the spot pair)
+announcement_score: label        # label: text_score 1.0 on the labelled announcement of the episode's coin (oracle mark) | keyword
+merge_hours: 1.0                 # announcements of the same coin within this span = one market event (1,036 Binance rows -> 563 events)
+bar_minutes: 5
+pre_bars: 864                    # 72 h before the anchor
+post_bars: 96                    # 8 h after; T = 961
+lead: 2                          # label 1 on [anchor - lead, peak]
+peak_window_bars: 12             # derived peak = argmax bar high within this window after the anchor (no peak time in the dataset)
+end_bars_after_peak: 24          # avail_label = peak + this on event rows
+n_controls_per_pump: 2           # 1 same-coin-other-time + 1 other-coin-same-time (when klines exist)
+gap_hours: 24
+control_span_days: 30
+control_exclude_window: true
+max_pumps: null                  # cap (evenly spaced over time) for smoke runs
+social_lag_bars: 0.0             # ingestion lag added to message times (avail = time + lag; usable at row ceil(avail))
+wallet_lag_bars: 1.0
+text_slots: 4
+text_dim: 32
+text_max_mb: 2048                # Panel.text is skipped (meta['text'] says so) above this size
+lookback: 48
+horizons: [1, 2, 3, 6, 12, 24]
+latency: 1
+bars_per_year: 105120
+seed: 0
+split: {train_frac: 0.6, val_frac: 0.15, purge_hours: 96}      # chronological over EPISODES (split_axis: assets); purge >= window length (80 h)
+split_axis: assets
+pit:
+  fields: [avail_feat, avail_label, universe, avail_text]
+  rule: "an event / document is usable at decision row t iff avail <= t; streams are rasterised at row ceil(avail)"
+  avail_feat: "t (bar close)"
+  avail_label: "episode end row = peak + end_bars_after_peak on event rows, else t + max(horizons)"
+  avail_text: "first row at which the message is usable = ceil(message time + social_lag_bars)"
+  universe: "a kline exists at that bar"
+  tradable: "kline exists and volume > 0"
+  streams: "social = message time + social_lag_bars; wallet = block time + wallet_lag_bars; orderflow = bar close (derived causally from the bars)"
+  wallet: "OPTIONAL <root>/crosspump/onchain/pumpsense_transfers.csv (key,time_ns,wallet_id,size_adv,size_raw); absent = missing modality (never zeros)"
+assumptions:
+  - "`date` is local export time: UTC+2 for most groups, UTC+3 for five groups (group_utc_offset_hours); groups without evidence use the default (unverified)"
+  - "labelled rows with Notes cancelled/postponed are dropped; 'futures' rows dropped"
+  - "no peak time: peak = argmax bar high within peak_window_bars after the anchor"
+  - "text_score 1.0 on labelled announcements is an oracle mark (manual label); other messages get a keyword lexicon score, not the paper's classifier"
+  - "announcements of the same coin within merge_hours are one episode; controls inherit the groups of their pump (channel-level social stream)"
+  - "no sender ids in the release: the group is the only social entity; 43 group folders are released (paper: 39)"
+  - "wallet platform only when onchain/pumpsense_transfers.csv exists"

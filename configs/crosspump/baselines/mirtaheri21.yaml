@@ -1,0 +1,20 @@
+# B1 Mirtaheri et al. (IEEE TCSS 2021, doi:10.1109/TCSS.2021.3059286) - crosspump/baselines/b1_mirtaheri21.py, registered as xp_mirtaheri21.
+baseline: xp_mirtaheri21
+alpha: 0.01                          # per-bar false-alarm budget on normal rows
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+n_exec: 4
+w_max: 1.0
+model:
+  windows: [3, 12, 48, 144]          # trailing windows (bars) of the social features (paper: hours-to-days before the pump)
+  pump_thr: 0.5                      # text_score >= pump_thr = pump message (stands in for the Telegram message classifier)
+  classifier: rf                     # rf | lightgbm (optional dependency, falls back to rf) ; lr is the last fallback
+  n_estimators: 200
+  max_depth: 8
+  class_weight: balanced_subsample
+  max_train_rows: 200000             # all positives + sub-sampled negatives
+  seed: 0
+smoke:
+  model: {n_estimators: 60, max_train_rows: 20000}

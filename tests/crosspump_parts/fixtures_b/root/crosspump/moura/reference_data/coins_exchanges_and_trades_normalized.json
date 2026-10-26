@@ -1,0 +1,26 @@
+{
+ "QQA": {
+  "binance": [
+   "USDT",
+   "BTC"
+  ],
+  "kucoin": [
+   "USDT"
+  ]
+ },
+ "QQB": {
+  "binance": [
+   "USDT"
+  ]
+ },
+ "QQC": {
+  "gateio": [
+   "USDT"
+  ]
+ },
+ "QQD": {
+  "binance": [
+   "BTC"
+  ]
+ }
+}

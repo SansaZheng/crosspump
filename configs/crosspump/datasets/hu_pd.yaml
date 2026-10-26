@@ -1,0 +1,54 @@
+# D1 Hu et al., SIGMOD 2023 (doi:10.1145/3588686, arXiv:2204.12929) -- crosspump/data/loaders/d1_hu_pd.py
+# Raw: <root>/crosspump/hu_pd/Data/Telegram/Labeled/PD_logs_cleaned.txt (+ optional raw/<channel_id>.pkl, Labeled/pred_pump_message.csv)
+#      + Binance 1m klines <root>/crosspump/binance_klines/<SYMBOL>BTC-1m-YYYY-MM.csv
+name: xp_hu_pd
+root: data_raw
+subdir: hu_pd
+messages: auto                   # auto: raw/<channel_id>.pkl when present else pred_pump_message.csv | raw | pred | none
+edited_text: drop                # edited Telegram messages keep their event but lose text score / embedding (keep: use the crawled text)
+exchange: binance                # venue filter on the event table; "all" keeps other venues too (prices stay Binance klines of the same symbol)
+quote: BTC
+bar_minutes: 5
+pre_bars: 864                    # 72 h before the anchor (Hu et al. 2023: price / volume drift from 57-60 h before the pump)
+post_bars: 96                    # 8 h after the anchor; T = pre_bars + post_bars + 1 = 961
+lead: 2                          # label 1 on [anchor - lead, peak]
+peak_window_bars: 12             # derived peak = argmax bar high within this window when the table has no curated peak
+end_bars_after_peak: 24          # avail_label = peak + this on event rows (the pump has played out)
+merge_hours: 6                   # rows of the same (coin, exchange) within this span = one pump relayed by several channels
+n_controls_per_pump: 2           # 1 same-coin-other-time + 1 other-coin-same-time (when other pumped coins have klines)
+gap_hours: 24                    # a control anchor is >= this far from any listed pump of its coin (all exchanges)
+control_span_days: 30            # same-coin controls are drawn uniformly inside +- this span around the pump
+control_exclude_window: true     # ... and no listed pump of the coin may fall anywhere inside the control window
+max_pumps: null                  # cap (evenly spaced over time) for smoke runs
+orderflow_source: auto           # auto: aggTrades only if EVERY episode has all window days cached, else bar-derived | bars | aggtrades
+orderflow_z: 2.5
+social_lag_bars: 0.0             # ingestion lag added to message times (avail = time + lag; usable at row ceil(avail))
+wallet_lag_bars: 1.0             # confirmation lag for on-chain transfers
+text_slots: 4
+text_dim: 32
+lookback: 48
+horizons: [1, 2, 3, 6, 12, 24]
+latency: 1
+bars_per_year: 105120
+seed: 0
+split: {train_frac: 0.6, val_frac: 0.15, purge_hours: 96}      # chronological over EPISODES (split_axis: assets); purge >= window length (80 h)
+split_axis: assets
+pit:
+  fields: [avail_feat, avail_label, universe, avail_text]
+  rule: "an event / document is usable at decision row t iff avail <= t; streams are rasterised at row ceil(avail)"
+  avail_feat: "t (bar close)"
+  avail_label: "episode end row = peak + end_bars_after_peak on event rows (peak knowable only after the dump), else t + max(horizons)"
+  avail_text: "first row at which the message is usable = ceil(message time + social_lag_bars)"
+  universe: "a kline exists at that bar"
+  tradable: "kline exists and volume > 0"
+  streams: "social = message time + social_lag_bars; wallet = block time + wallet_lag_bars; orderflow = bar / bucket close"
+  wallet: "OPTIONAL <root>/crosspump/onchain/hu_pd_transfers.csv (key,time_ns,wallet_id,size_adv,size_raw); absent = missing modality (never zeros)"
+assumptions:
+  - "timestamps are UTC; anchor = earliest announcement row of a (coin, exchange) cluster within merge_hours; only pair == quote rows"
+  - "no curated peak: peak = argmax bar high within peak_window_bars after the anchor"
+  - "Telegram views / forwards are crawl-time counts (not PIT): reach is NaN"
+  - "edited messages lose text score and embedding (edited_text: drop)"
+  - "pred_pump_message.csv fallback is a classifier-selected subset (existence of a message there is mildly look-ahead)"
+  - "keyword text_score = min(1, distinct lexicon hits / 4); announcement rows get 1.0"
+  - "control windows carry the messages of the channels that announced the pump they control for (coin-agnostic social stream)"
+  - "wallet platform only when onchain/hu_pd_transfers.csv exists (ERC-20 / BEP-20 tokens; partial coverage)"

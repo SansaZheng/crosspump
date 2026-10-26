@@ -1,0 +1,35 @@
+{
+ "QQA": [
+  {
+   "date": "2022-03-03",
+   "first_message_unix": 1646287330,
+   "last_message_unix": 1646338200
+  },
+  {
+   "date": "2022-03-05",
+   "first_message_unix": 1646449200,
+   "last_message_unix": 1646449200
+  }
+ ],
+ "QQB": [
+  {
+   "date": "2022-03-04",
+   "first_message_unix": 1646388000,
+   "last_message_unix": 1646431200
+  }
+ ],
+ "QQC": [
+  {
+   "date": "2022-03-04",
+   "first_message_unix": 1646391600,
+   "last_message_unix": 1646395200
+  }
+ ],
+ "QQD": [
+  {
+   "date": "2022-03-04",
+   "first_message_unix": 1646391600,
+   "last_message_unix": 1646395200
+  }
+ ]
+}

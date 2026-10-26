@@ -1,0 +1,23 @@
+# CrossPump (this paper) - crosspump/models/crosspump.py, registered as "crosspump".
+baseline: crosspump
+alpha: 0.01                          # per-bar false-alarm budget on normal rows
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+n_exec: 4
+w_max: 1.0
+platforms: [social, wallet, orderflow]
+model:
+  hawkes_iters: 200
+  hawkes_lr: 0.05
+  max_train_episodes: 200
+  two_models: true                   # pump-episode vs control-episode Hawkes -> sequential log-likelihood ratio
+  llr_window: 48
+  head_features: all                 # all | hawkes_only | counts_only | llr_only
+  count_windows: [3, 12, 48]
+  warmup: 12
+  head_l2: 0.01
+  head_iters: 300
+smoke:
+  model: {hawkes_iters: 60, max_train_episodes: 40}

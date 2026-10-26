@@ -1,0 +1,4 @@
+# Ablation fixed_gate of CrossPump (applied as baseline.gate override by scripts/xp_run_all.sh --ablations)
+_base_: crosspump
+ablation: fixed_gate
+gate: {type: fixed}

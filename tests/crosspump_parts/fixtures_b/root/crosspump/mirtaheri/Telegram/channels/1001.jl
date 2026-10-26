@@ -1,0 +1,8 @@
+{"_": "Message", "id": 61, "to_id": {"_": "PeerChannel", "channel_id": 1001}, "date": {"$date": 1520330400000}, "message": "good morning", "out": false, "post": true, "from_id": null, "views": 1295, "entities": []}
+{"_": "Message", "id": 60, "to_id": {"_": "PeerChannel", "channel_id": 1001}, "date": {"$date": 1520242210000}, "message": "MMB/BTC buy now on Bittrex", "out": false, "post": true, "from_id": null, "views": 1294, "entities": []}
+{"_": "Message", "id": 55, "to_id": {"_": "PeerChannel", "channel_id": 1001}, "date": {"$date": 1520150400000}, "message": "", "out": false, "post": true, "from_id": null, "views": 1289, "entities": []}
+{"_": "Message", "id": 51, "to_id": {"_": "PeerChannel", "channel_id": 1001}, "date": {"$date": 1520080800000}, "message": "MMA hit target, profit!", "out": false, "post": true, "from_id": null, "views": 1285, "entities": []}
+{"_": "Message", "id": 50, "to_id": {"_": "PeerChannel", "channel_id": 1001}, "date": {"$date": 1520078430000}, "message": "Buy $MMA on Binance 100 sats, target 150", "out": false, "post": true, "from_id": null, "views": 1284, "entities": []}
+{"_": "Message", "id": 49, "to_id": {"_": "PeerChannel", "channel_id": 1001}, "date": {"$date": 1520078100000}, "message": "5 minutes", "out": false, "post": true, "from_id": null, "views": 1283, "entities": []}
+{"_": "Message", "id": 40, "to_id": {"_": "PeerChannel", "channel_id": 1001}, "date": {"$date": 1520067600000}, "message": "Big signal today, be ready", "out": false, "post": true, "from_id": null, "views": 1274, "entities": []}
+{"_": "MessageService", "id": 1, "to_id": {"_": "PeerChannel", "channel_id": 1001}, "date": {"$date": 1519862400000}, "action": {"_": "MessageActionChannelCreate", "title": "fixture"}}

@@ -1,0 +1,4 @@
+# Ablation social_only of CrossPump (applied as baseline.platforms override by scripts/xp_run_all.sh --ablations)
+_base_: crosspump
+ablation: social_only
+platforms: [social]

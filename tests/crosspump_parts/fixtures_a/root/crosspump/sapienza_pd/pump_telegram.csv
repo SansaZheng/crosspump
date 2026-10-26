@@ -1,0 +1,7 @@
+symbol,group,date,hour,exchange
+AAA,G1,2021-03-03,12:00,binance
+AAA,G2,2021-03-03,12:00,binance
+BBB,G2,2021-03-04,15:00,binance
+CCC,G1,2021-03-05,09:00,binance
+DDD,G3,2021-03-04,10:00,yobit
+ZZZ,G1,2021-03-04,18:00,binance

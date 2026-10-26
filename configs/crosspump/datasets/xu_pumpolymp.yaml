@@ -1,0 +1,50 @@
+# D3 Xu & Livshits, USENIX Security 2019 (arXiv:1811.10109) -- crosspump/data/loaders/d3_xu_pumpolymp.py
+# Raw: <root>/crosspump/xu_pumpdump/code and data/rawpumpolymp.json
+#      + Binance 1m klines <root>/crosspump/binance_klines/<SYMBOL>BTC-1m-YYYY-MM.csv
+name: xp_xu_pumpolymp
+root: data_raw
+subdir: xu_pumpdump
+exchange: binance                # venue filter on the event table; "all" keeps other venues too (prices stay Binance klines of the same symbol)
+quote: BTC
+bar_minutes: 5
+pre_bars: 864                    # 72 h before the anchor (Hu et al. 2023: price / volume drift from 57-60 h before the pump)
+post_bars: 96                    # 8 h after the anchor; T = pre_bars + post_bars + 1 = 961
+lead: 2                          # label 1 on [anchor - lead, peak]
+peak_window_bars: 12             # derived peak = argmax bar high within this window when the table has no curated peak
+end_bars_after_peak: 24          # avail_label = peak + this on event rows (the pump has played out)
+merge_hours: 6                   # rows of the same (coin, exchange) within this span = one pump relayed by several channels
+n_controls_per_pump: 2           # 1 same-coin-other-time + 1 other-coin-same-time (when other pumped coins have klines)
+gap_hours: 24                    # a control anchor is >= this far from any listed pump of its coin (all exchanges)
+control_span_days: 30            # same-coin controls are drawn uniformly inside +- this span around the pump
+control_exclude_window: true     # ... and no listed pump of the coin may fall anywhere inside the control window
+max_pumps: null                  # cap (evenly spaced over time) for smoke runs
+orderflow_source: auto           # auto: aggTrades only if EVERY episode has all window days cached, else bar-derived | bars | aggtrades
+orderflow_z: 2.5
+social_lag_bars: 0.0             # ingestion lag added to message times (avail = time + lag; usable at row ceil(avail))
+wallet_lag_bars: 1.0             # confirmation lag for on-chain transfers
+text_slots: 4
+text_dim: 32
+lookback: 48
+horizons: [1, 2, 3, 6, 12, 24]
+latency: 1
+bars_per_year: 105120
+seed: 0
+split: {train_frac: 0.6, val_frac: 0.15, purge_hours: 96}      # chronological over EPISODES (split_axis: assets); purge >= window length (80 h)
+split_axis: assets
+pit:
+  fields: [avail_feat, avail_label, universe]
+  rule: "an event / document is usable at decision row t iff avail <= t; streams are rasterised at row ceil(avail)"
+  avail_feat: "t (bar close)"
+  avail_label: "episode end row = peak + end_bars_after_peak on event rows (peak knowable only after the dump), else t + max(horizons)"
+  avail_text: "n/a (no message text in this dataset)"
+  universe: "a kline exists at that bar"
+  tradable: "kline exists and volume > 0"
+  streams: "social = message time + social_lag_bars; wallet = block time + wallet_lag_bars; orderflow = bar / bucket close"
+  wallet: "OPTIONAL <root>/crosspump/onchain/xu_pumpolymp_transfers.csv (key,time_ns,wallet_id,size_adv,size_raw); absent = missing modality (never zeros)"
+assumptions:
+  - "no pair field: Binance records are taken as <SYMBOL>BTC pumps (meta.price_check compares the kline close with priceBeforePump)"
+  - "signalTime / trade timestamps are UTC; records dated before 2017 are corrupt and dropped"
+  - "curated peak = time of the highest marketHistoryEntries trade at or after signalTime - 60 s (label side only), else derived"
+  - "marketHistoryEntries is not used as an order-flow stream (pump records only, no trade side)"
+  - "no message text: social stream = announcement events only"
+  - "wallet platform only when onchain/xu_pumpolymp_transfers.csv exists (ERC-20 / BEP-20 tokens; partial coverage)"

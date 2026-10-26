@@ -1,0 +1,33 @@
+# B5 Hu et al. (SIGMOD 2023 / PACMMOD 1(1), doi:10.1145/3588686) - crosspump/baselines/b5_hu23.py, registered as xp_hu23.
+baseline: xp_hu23
+alpha: 0.01                          # per-bar false-alarm budget on normal rows
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+n_exec: 4
+w_max: 1.0
+model:
+  windows: [3, 12, 48]               # bars of the candidate-coin market features
+  warmup: 12
+  max_seq: 50                        # modeling.py: max_seq_length / sequence_mask maxlen 50
+  heads: 8                           # positional attention heads (modeling.py L74)
+  hidden1: 32                        # modeling.py L15-18
+  hidden2: 16
+  lr: 0.0005
+  epochs: 10
+  batch: 256
+  weight_decay: 0.00001
+  pos_weight_cap: 50.0
+  coin_embedding: true               # hashed symbol embedding (official: Binance coin vocabulary)
+  n_coin_buckets: 256
+  d_coin: 8
+  n_channel_buckets: 64
+  d_channel: 8
+  min_prior: 1.0                     # a social source counts as a known organiser when mark[3] >= min_prior or it has a train history
+  min_history: 2                     # train pump episodes a source must appear in to own a sequence
+  max_train_rows: 60000
+  seed: 0
+smoke:
+  # synthetic symbols are unique per episode, so the coin embedding carries no signal there and is switched off in smoke mode
+  model: {epochs: 8, lr: 0.002, max_seq: 8, heads: 2, coin_embedding: false, max_train_rows: 8000}

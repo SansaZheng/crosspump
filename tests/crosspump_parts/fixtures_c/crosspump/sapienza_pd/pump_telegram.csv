@@ -1,0 +1,4 @@
+symbol,group,date,hour,exchange
+AAA,SYNTHGROUP,2018-03-05,16:00,yobit
+BBB,SYNTHGROUP,2018-03-07,18:05,cryptopia
+ZZZ,OTHER,2018-03-06,12:00,binance

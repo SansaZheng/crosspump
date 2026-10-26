@@ -1,0 +1,54 @@
+# D2 La Morgia et al., ACM TOIT 23(1) 2023 (doi:10.1145/3561300, arXiv:2105.00733) -- crosspump/data/loaders/d2_sapienza_pd.py
+# Raw: <root>/crosspump/sapienza_pd/pump_telegram.csv (+ optional groups.csv, labeled_features/features_25S.csv.gz)
+#      + Binance 1m klines <root>/crosspump/binance_klines/<SYMBOL>BTC-1m-YYYY-MM.csv
+name: xp_sapienza_pd
+root: data_raw
+subdir: sapienza_pd
+refine_anchor: true              # anchor = manually corrected pump start (labeled_features gt chunk) when one matches
+refine_file: features_25S.csv.gz
+refine_tolerance_minutes: 60
+exchange: binance                # venue filter on the event table; "all" keeps other venues too (prices stay Binance klines of the same symbol)
+quote: BTC
+bar_minutes: 5
+pre_bars: 864                    # 72 h before the anchor (Hu et al. 2023: price / volume drift from 57-60 h before the pump)
+post_bars: 96                    # 8 h after the anchor; T = pre_bars + post_bars + 1 = 961
+lead: 2                          # label 1 on [anchor - lead, peak]
+peak_window_bars: 12             # derived peak = argmax bar high within this window when the table has no curated peak
+end_bars_after_peak: 24          # avail_label = peak + this on event rows (the pump has played out)
+merge_hours: 6                   # rows of the same (coin, exchange) within this span = one pump relayed by several channels
+n_controls_per_pump: 2           # 1 same-coin-other-time + 1 other-coin-same-time (when other pumped coins have klines)
+gap_hours: 24                    # a control anchor is >= this far from any listed pump of its coin (all exchanges)
+control_span_days: 30            # same-coin controls are drawn uniformly inside +- this span around the pump
+control_exclude_window: true     # ... and no listed pump of the coin may fall anywhere inside the control window
+max_pumps: null                  # cap (evenly spaced over time) for smoke runs
+orderflow_source: auto           # auto: aggTrades only if EVERY episode has all window days cached, else bar-derived | bars | aggtrades
+orderflow_z: 2.5
+social_lag_bars: 0.0             # ingestion lag added to message times (avail = time + lag; usable at row ceil(avail))
+wallet_lag_bars: 1.0             # confirmation lag for on-chain transfers
+text_slots: 4
+text_dim: 32
+lookback: 48
+horizons: [1, 2, 3, 6, 12, 24]
+latency: 1
+bars_per_year: 105120
+seed: 0
+split: {train_frac: 0.6, val_frac: 0.15, purge_hours: 96}      # chronological over EPISODES (split_axis: assets); purge >= window length (80 h)
+split_axis: assets
+pit:
+  fields: [avail_feat, avail_label, universe]
+  rule: "an event / document is usable at decision row t iff avail <= t; streams are rasterised at row ceil(avail)"
+  avail_feat: "t (bar close)"
+  avail_label: "episode end row = peak + end_bars_after_peak on event rows (peak knowable only after the dump), else t + max(horizons)"
+  avail_text: "n/a (no message text in this dataset)"
+  universe: "a kline exists at that bar"
+  tradable: "kline exists and volume > 0"
+  streams: "social = message time + social_lag_bars; wallet = block time + wallet_lag_bars; orderflow = bar / bucket close"
+  wallet: "OPTIONAL <root>/crosspump/onchain/sapienza_pd_transfers.csv (key,time_ns,wallet_id,size_adv,size_raw); absent = missing modality (never zeros)"
+assumptions:
+  - "date / hour columns and labeled_features chunk times are UTC"
+  - "no pair column: Binance rows are taken as <SYMBOL>BTC pumps; rows without such klines are dropped and counted"
+  - "corrected pump start moves only the anchor / label window; the social event stays at the table time"
+  - "no curated peak: peak = argmax bar high within peak_window_bars after the anchor"
+  - "no message text: social stream = announcement events only"
+  - "the authors' precomputed rush-order features are not used (block-normalised, not PIT)"
+  - "wallet platform only when onchain/sapienza_pd_transfers.csv exists (ERC-20 / BEP-20 tokens; partial coverage)"

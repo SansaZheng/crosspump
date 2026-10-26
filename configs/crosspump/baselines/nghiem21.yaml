@@ -1,0 +1,24 @@
+# B2 Nghiem et al. (ESWA 182:115284, 2021, doi:10.1016/j.eswa.2021.115284) - crosspump/baselines/b2_nghiem21.py, registered as xp_nghiem21.
+baseline: xp_nghiem21
+alpha: 0.01                          # per-bar false-alarm budget on normal rows
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+n_exec: 4
+w_max: 1.0
+model:
+  arch: clstm                        # clstm (Conv1d -> LSTM, default) | blstm | cnn   (the three sequence models of the paper)
+  conv: 32                           # Conv1d channels (not in the public repo; sheet)
+  kernel: 3
+  hidden: 32                         # LSTM units
+  dropout: 0.1
+  warmup: 12                         # expanding z-score warm-up (bars)
+  epochs: 8
+  lr: 0.001                          # Adam 1e-3 as in Final_Mod_3a (create_OHLCV_model)
+  batch: 256
+  pos_weight_cap: 50.0
+  max_train_rows: 30000
+  seed: 0
+smoke:
+  model: {epochs: 4, max_train_rows: 3000, conv: 16, hidden: 16}

@@ -1,0 +1,13 @@
+date,text,Pump,Exchange,Coin,Notes
+2021-03-01T10:00:00,Welcome to the fixture group,,,,
+2021-03-03T15:00:10,"['Next ', {'type': 'bold', 'text': 'pump'}, ' in 4 hours on Binance, get ready']",,,,
+2021-03-03T18:30:00,30 minutes left until the pump! Buy fast and hold,,,,
+2021-03-03T18:55:00,5 min,,,,
+2021-03-03T19:00:20,"['The coin is: ', {'type': 'hashtag', 'text': '#AAA'}, ' buy now, target 300%']",1,binance,aaa/btc,
+2021-03-03T19:20:00,"Great pump everyone, +60% profit",,,,
+2021-03-04T12:00:00,,,,,
+2021-03-04T18:00:05,,1,binance,bbb/btc,
+2021-03-05T19:00:00,"pump cancelled today, sorry",1,binance,ccc/btc,CANCELLED
+2021-03-05T20:00:00,ZZZ on yobit now,1,yobit,zzz/btc,
+2021-03-06T20:00:30,"Coin: AAA  buy and hold, target x2",1,binance,aaa/btc,
+2021-03-06T21:00:00,long BBB futures,1,binance,bbb/usdt,futures

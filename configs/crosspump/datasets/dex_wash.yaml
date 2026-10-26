@@ -1,0 +1,57 @@
+# D8 on-chain DEX trades around Telegram pump announcements (Victor & Weintraud, WWW 2021, doi:10.1145/3442381.3449824; Zenodo 4540223, CC-BY-4.0)
+# crosspump/data/loaders/d8_dex_wash.py. Raw: <root>/crosspump/victor_dex/{EtherDeltaTrades.csv, IDEXTrades.csv, token_decimals.json}
+# + pump times from <root>/crosspump/sapienza_pd/pump_telegram.csv and (optional) <root>/crosspump/mirtaheri/Telegram/classified/coin-pump.csv
+name: xp_dex_wash
+root: data_raw
+subdir: crosspump/victor_dex
+quote: ETH                       # prices are ETH per token (on-chain), volume in token units
+exchange: etherdelta+idex
+dex: [etherdelta, idex]
+use_mirtaheri: true              # also read the Mirtaheri classified pump messages for pump times
+dedup_hours: 24                  # pump-table rows of one symbol closer than this = one episode (anchor = earliest)
+bar_minutes: 15
+pre_bars: 288                    # 72 h
+post_bars: 96                    # 24 h
+lead: 2
+peak_window_bars: 12             # peak = argmax high within 3 h after the anchor
+end_bars_after_peak: 24
+min_trades_in_window: 20         # episodes / controls with fewer on-chain trades in the window are dropped
+min_bars_frac: 0.25
+n_controls_per_pump: 2           # same token at non-pump times (common.sample_controls)
+gap_hours: 96                    # no pump of the token within +-gap of a control anchor (>= window length)
+control_span_days: 30
+adv_days: 7                      # trailing mean daily volume for size_adv
+wallet_side: taker               # wallet event = taker-buy trade (wallet = hashed taker); "buyer" = every trade's buyer
+wallet_lag_minutes: 3            # block confirmation lag added to the trade time
+social_lag_minutes: 0
+burst_z: 2.5
+burst_warmup: 30
+burst_halflife: 60
+max_wallet_events_per_episode: 5000   # seeded subsample above this (recorded in streams.meta['wallet_subsampled'])
+wash_window_s: 3600
+wash_tol: 0.05
+max_pumps: null
+text_slots: 0
+lookback: 48
+horizons: [1, 2, 3, 6, 12, 24]
+latency: 1
+bars_per_year: 35040
+seed: 0
+chunksize: 500000
+use_cache: true                  # normalised trades of the selected tokens cached under <subdir>/cache/ (cache_dir overrides)
+split: {train_frac: 0.6, val_frac: 0.15, purge_hours: 96}
+split_axis: assets
+pit:
+  fields: [avail_feat, avail_label, universe]
+  social: "pump-table row / classified message time + social_lag_minutes"
+  wallet: "trade (block) time + wallet_lag_minutes"
+  orderflow: "bar close (z-score statistics from strictly earlier bars)"
+  avail_label: "event end bar = peak + end_bars_after_peak; bars_to_peak exact"
+  universe: "bar exists (between the token's first and last trade)"
+  tradable: "at least one trade in the bar (carried bars have volume 0)"
+assumptions:
+  - "EtherDelta: get = maker, give = taker; tokenGet == ETH -> taker buys the token; token-token trades dropped"
+  - "IDEX: amount in tokenBuy units, counter amount = amountSell*amount/amountBuy; tokenBuy == ETH -> taker buys; status 0.0 rows dropped"
+  - "pump tables list CEX pumps only: episode = on-chain DEX market of the same ticker around the announcement (ticker collisions unresolved)"
+  - "pump table times are UTC; peak derived on the DEX bars (no curated peak)"
+  - "wash_labels (meta only) = self-trades + 2-cycles, a cheap subset of the authors' rule"

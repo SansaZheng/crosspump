@@ -1,0 +1,4 @@
+# Ablation llr_only of CrossPump (applied as baseline.model override by scripts/xp_run_all.sh --ablations)
+_base_: crosspump
+ablation: llr_only
+model: {head_features: llr_only}

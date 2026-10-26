@@ -1,0 +1,22 @@
+# B8 PumpSense, Mahrous & Di Pietro, IEEE ICBC 2026, arXiv:2605.09431 - crosspump/baselines/b8_pumpsense26.py, registered as xp_pumpsense26.
+# Sheet: crosspump/baselines/sheets/pumpsense26.md
+baseline: xp_pumpsense26
+alpha: 0.01                          # per-bar false-alarm budget on normal rows
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+n_exec: 4
+w_max: 1.0
+model:
+  backend: lightgbm                  # lightgbm if importable, else sklearn HistGradientBoosting (recorded in diag / status)
+  window_bars: 12                    # message window = usable messages of the last 12 bars (paper: 7/11/15 messages)
+  long_bars: 48                      # reference window for the message-rate excess
+  text_dims: 32                      # leading dims of the mean document embedding (only if the panel carries text)
+  n_estimators: 100                  # lightgbm_classification.py L157-167
+  learning_rate: 0.1
+  max_depth: 6
+  num_leaves: 31
+  seed: 42
+smoke:
+  model: {n_estimators: 40}

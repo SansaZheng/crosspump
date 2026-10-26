@@ -1,0 +1,4 @@
+{"_": "Message", "id": 12, "to_id": {"_": "PeerChannel", "channel_id": 1002}, "date": {"$date": 1520326800000}, "message": "ZZZ on yobit", "out": false, "post": true, "from_id": null, "views": 1246, "entities": []}
+{"_": "Message", "id": 11, "to_id": {"_": "PeerChannel", "channel_id": 1002}, "date": {"$date": 1520323200000}, "message": "have funx with trading today", "out": false, "post": true, "from_id": null, "views": 1245, "entities": []}
+{"_": "Message", "id": 9, "to_id": {"_": "PeerChannel", "channel_id": 1002}, "date": {"$date": 1520244000000}, "message": "HOLD your coins", "out": false, "post": true, "from_id": null, "views": 1243, "entities": []}
+{"_": "Message", "id": 7, "to_id": {"_": "PeerChannel", "channel_id": 1002}, "date": {"$date": 1520079600000}, "message": "MMA pump running, buy", "out": false, "post": true, "from_id": null, "views": 1241, "entities": []}

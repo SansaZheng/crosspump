@@ -1,0 +1,4 @@
+# Ablation hawkes_only of CrossPump (applied as baseline.model override by scripts/xp_run_all.sh --ablations)
+_base_: crosspump
+ablation: hawkes_only
+model: {head_features: hawkes_only}

@@ -1,0 +1,5 @@
+channel_id	sample_id	message	date	pred_label
+222	40	synthetic pump signal in 2 hours on binance btc pair be ready	2021-03-03 10:02:00+00:00	1.0
+222	41	synthetic the coin is aaa buy now	2021-03-03 12:02:10+00:00	1.0
+222	55	synthetic pump in 60 minutes hold your btc	2021-03-05 08:00:30+00:00	1.0
+999	3	synthetic unrelated channel message	2021-03-03 11:00:00+00:00	1.0

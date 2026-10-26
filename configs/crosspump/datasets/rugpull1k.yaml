@@ -1,0 +1,39 @@
+# D9 TM-RugPull / RugPull1K (Shoaei et al., arXiv:2602.21529, 2026; HF fati-80-Sho/RugPull1K; licence CC BY-NC 4.0 per the HF card and repo)
+# crosspump/data/loaders/d9_rugpull1k.py. Raw: <root>/crosspump/rugpull1k/dataset.xlsx or <root>/crosspump/rugpull_defender/src/DataSet/dataset.xlsx
+# TABULAR ONLY: one row per project, no time series -> DEGENERATE panel (feature row at the anchor), excluded from lead-time metrics.
+name: xp_rugpull1k
+root: data_raw
+subdir: crosspump/rugpull1k
+quote: USD
+exchange: on-chain
+bar_minutes: 1440                # daily rows; only the anchor row carries data
+pre_bars: 30
+post_bars: 30
+lead: 2
+n_controls_per_pump: null        # controls = the projects labelled "normal" (no sampling)
+gap_hours: null
+max_pumps: null                  # chronological cap on the number of projects (smoke runs)
+wallet_summary_event: true       # one wallet summary event (holder column) at the anchor
+text_slots: 0
+lookback: 1
+horizons: [1, 2, 3, 5, 10]
+latency: 1
+bars_per_year: 365
+tabular_only: true
+excluded_from: [lead_time]
+split: {train_frac: 0.6, val_frac: 0.15, purge_hours: 96}
+split_axis: assets
+pit:
+  fields: [avail_feat, avail_label, universe]
+  anchor: "project midpoint = (start + end) / 2 (the dataset's own observation cut-off)"
+  features: "first-half columns only; MaxPrice Quarter 3/4 and the end date are outcomes (meta['outcomes'])"
+  social: "Google result counts at the midpoint (and at the project start when inside the window); avail = time"
+  wallet: "holder-column summary at the midpoint"
+  orderflow: "missing"
+  avail_label: "anchor row for the labelled rows"
+assumptions:
+  - "no per-project time series exist in the release: degenerate panel, meta['tabular_only'] = true"
+  - "non-outcome columns are first-half measurements (authors' claim, not verifiable); the midpoint depends on the end date"
+  - "is_pump = class == scam; peak_row = anchor row"
+  - "mid at the anchor = MaxPrice (Quarter 2), a price-level proxy, never tradable"
+  - "licence is CC BY-NC 4.0, not CC BY 4.0"

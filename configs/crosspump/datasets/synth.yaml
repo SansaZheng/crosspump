@@ -1,0 +1,18 @@
+# Synthetic cross-platform testbed (crosspump/data/synthetic.py): planted social -> wallet -> order-flow chain. Smoke tests and E0 only.
+name: xp_synth
+seed: 1
+n_pumps: 40
+n_controls: 80
+pre_bars: 144
+post_bars: 48
+bar_minutes: 5
+lead: 2
+chain_strength: 1.0
+teaser_frac: 0.6
+single_burst_frac: 0.5
+wallet_missing_frac: 0.25
+lookback: 24
+horizons: [1, 2, 3, 6, 12, 24]
+latency: 1
+bars_per_year: 105120
+split: {train_frac: 0.6, val_frac: 0.15, purge_hours: 24, n_folds: 2}

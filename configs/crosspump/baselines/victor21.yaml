@@ -1,0 +1,16 @@
+# B3 Victor & Weintraud (WWW 2021, doi:10.1145/3442381.3449824) - crosspump/baselines/b3_victor21.py, registered as xp_victor21.
+baseline: xp_victor21
+alpha: 0.01                          # per-bar false-alarm budget on normal rows
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+n_exec: 4
+w_max: 1.0
+model:
+  window: 48                         # bars: cycle span and concentration window (paper sweeps hour / day / week windows)
+  volume_tol: 0.25                   # |log size difference| allowed between the two ends of a cycle (paper: 1 % margin on net positions)
+  min_events: 2                      # fewer usable wallet events in the window -> score 0 (no evidence)
+  weights: [1.0, 1.0, 1.0]           # wash_share, repeat_share, hhi_excess
+smoke:
+  model: {window: 48}

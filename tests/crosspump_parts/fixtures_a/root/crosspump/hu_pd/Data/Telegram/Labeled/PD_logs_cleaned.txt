@@ -1,0 +1,8 @@
+channel_id	session_id	coin	exchange	pair	timestamp
+111	5	AAA	binance	BTC	2021-03-03 12:01:33+00:00
+222	9	AAA	binance	BTC	2021-03-03 12:02:10+00:00
+111	7	BBB	binance	BTC	2021-03-04 15:00:02+00:00
+222	12	CCC	binance	BTC	2021-03-05 09:00:00+00:00
+333	1	DDD	yobit	BTC	2021-03-04 10:00:00+00:00
+111	8	ZZZ	binance	BTC	2021-03-04 18:00:00+00:00
+111	6	AAA	binance	USDT	2021-03-03 20:00:00+00:00

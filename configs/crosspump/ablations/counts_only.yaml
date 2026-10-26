@@ -1,0 +1,4 @@
+# Ablation counts_only of CrossPump (applied as baseline.model override by scripts/xp_run_all.sh --ablations)
+_base_: crosspump
+ablation: counts_only
+model: {head_features: counts_only}

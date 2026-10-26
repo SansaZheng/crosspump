@@ -1,0 +1,37 @@
+# CrossPump track defaults (namespaced; never read by other tracks). Dataset yaml overrides data/split/horizons.
+deterministic: true
+device: auto
+
+data:
+  lookback: 48
+  latency: 1            # decision at the close of bar t, fill at the close of t + latency
+  exec_max: 4
+  vol_window: 60
+  neg_subsample: null   # evaluation never sub-samples; training rows may (per baseline yaml)
+
+split:                  # chronological over EPISODES (anchor time); purge >= one window length in wall-clock time
+  train_frac: 0.6
+  val_frac: 0.15
+  purge_hours: 96
+  n_folds: 2
+  min_train: 8
+  max_folds: null
+
+cost:
+  commission_bps: 5.0   # training / headline cost; evaluation re-prices at eval.cost_grid_bps
+  use_half_spread: true
+  impact_eta: 0.1
+  delay_zeta: 0.05
+  notional: 0.05
+
+eval:
+  cost_grid_bps: [1, 5, 10, 15, 30]
+  seeds: [42, 2024, 2025, 2026]
+  far_grid: [0.001, 0.005, 0.01, 0.05]
+  hold_late_bars: 12      # follower benchmark: late exit 12 bars after the announcement (Ardia & Bluteau 2024: Twitter followers sell late)
+  early_window_bars: 0    # 0 = any pre-anchor alarm inside the window counts as early
+
+policy:
+  n_exec: 4
+  w_max: 1.0
+  hold_index: 2

@@ -1,0 +1,21 @@
+# B7 PERSEUS, Fu, Feng, Wu, Xu, arXiv:2503.01686 (2025) - crosspump/baselines/b7_perseus25.py, registered as xp_perseus25.
+# Sheet: crosspump/baselines/sheets/perseus25.md (no public code; GraphSAGE-style reimplementation in plain torch)
+baseline: xp_perseus25
+alpha: 0.01                          # per-bar false-alarm budget on normal rows
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+n_exec: 4
+w_max: 1.0
+model:
+  score_every: 2                     # k: the graph is scored every k-th bar and forward-filled in between (k = 1: every bar)
+  gap_bars: 12                       # edge u -> v when v's first post follows u's first post within this many bars
+  max_nodes: 256                     # dense-adjacency cap (most recently active sources kept)
+  hidden: 32
+  epochs: 30
+  lr: 0.01
+  chunk: 128                         # graphs per batch
+  seed: 0
+smoke:
+  model: {hidden: 16, epochs: 8, score_every: 2, max_nodes: 64}

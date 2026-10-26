@@ -1,0 +1,27 @@
+# B10 LROO, Shoaei, Pishdar, Bag-Mohammadi, Karami, arXiv:2603.11324 (2026) - crosspump/baselines/b10_lroo26.py, registered as xp_lroo26.
+# Sheet: crosspump/baselines/sheets/lroo26.md
+baseline: xp_lroo26
+alpha: 0.01                          # per-bar false-alarm budget on normal rows
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+n_exec: 4
+w_max: 1.0
+model:
+  backend: tabpfn                    # tabpfn if importable (weights needed), else sklearn HistGradientBoosting (recorded)
+  windows: [3, 12, 48]               # trailing windows (bars) of the wallet / order-flow / social statistics
+  max_train_rows: 1000               # TabPFN context size (class-stratified subsample of the train rows)
+  tabpfn_estimators: null            # null = package default
+  device: cpu
+  fallback_max_rows: 200000          # row cap of the HistGradientBoosting fallback
+  n_estimators: 100                  # fallback booster
+  learning_rate: 0.1
+  max_depth: 6
+  num_leaves: 31
+  warmup: 30                         # EWMA z-score of log_volume / taker_imb
+  halflife: 60.0
+  predict_chunk: 2000
+  seed: 42
+smoke:
+  model: {max_train_rows: 300, n_estimators: 40, warmup: 20}

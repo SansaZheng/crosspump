@@ -1,0 +1,20 @@
+# B4 La Morgia et al. (ACM TOIT 23(1) 2023, doi:10.1145/3561300) - crosspump/baselines/b4_lamorgia23.py, registered as xp_lamorgia23.
+baseline: xp_lamorgia23
+alpha: 0.01                          # per-bar false-alarm budget on normal rows
+gate: {type: delayed_aci, gamma: 0.005, window: 2000}
+lookback: 48
+latency: 1
+hold_index: 2
+n_exec: 4
+w_max: 1.0
+model:
+  windows: [3, 12, 48]               # bars; stand in for the official 5 / 15 / 25 s chunk sizes
+  rush_base: 48                      # rush bar = taker_imb > 0 and trades > rolling mean of the previous rush_base bars
+  rush_min_periods: 12
+  n_estimators: 200                  # classifier.py L29: RandomForestClassifier(n_estimators=200, max_depth=5, random_state=1)
+  max_depth: 5
+  class_weight: null
+  max_train_rows: 200000
+  seed: 1
+smoke:
+  model: {n_estimators: 60, max_train_rows: 20000}
